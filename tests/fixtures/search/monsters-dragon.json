@@ -1,0 +1,611 @@
+{
+    "count": 312,
+    "next": "https://api.open5e.com/v1/monsters/?limit=5&page=2&search=dragon",
+    "previous": null,
+    "results": [
+        {
+            "slug": "adult-amethyst-dragon-a5e",
+            "desc": "",
+            "name": "Adult Amethyst Dragon",
+            "size": "Huge",
+            "type": "Dragon",
+            "subtype": "",
+            "group": null,
+            "alignment": "",
+            "armor_class": 18,
+            "armor_desc": "",
+            "hit_points": 220,
+            "hit_dice": "21d12+84",
+            "speed": {
+                "walk": 40,
+                "burrow": 30,
+                "fly": 60
+            },
+            "strength": 18,
+            "dexterity": 20,
+            "constitution": 18,
+            "intelligence": 22,
+            "wisdom": 14,
+            "charisma": 20,
+            "strength_save": null,
+            "dexterity_save": null,
+            "constitution_save": 10,
+            "intelligence_save": 12,
+            "wisdom_save": 8,
+            "charisma_save": 11,
+            "perception": null,
+            "skills": {
+                "deception": 11,
+                "insight": 8,
+                "perception": 8,
+                "persuasion": 11
+            },
+            "damage_vulnerabilities": "",
+            "damage_resistances": "force, psychic",
+            "damage_immunities": "",
+            "condition_immunities": "fatigue",
+            "senses": "darkvision 120 ft., passive Perception 18",
+            "languages": "Common, Deep Speech, Draconic, Undercommon, telepathy 120 ft.",
+            "challenge_rating": "17",
+            "cr": 17.0,
+            "actions": [
+                {
+                    "name": "Multiattack",
+                    "desc": "The dragon attacks once with its bite and twice with its claws. In place of its bite  it can use Psionic Wave."
+                },
+                {
+                    "name": "Bite",
+                    "desc": "Melee Weapon Attack: +10 to hit, reach 10 ft., one target. Hit: 20 (3d10 + 4) piercing damage plus 4 (1d8) force damage."
+                },
+                {
+                    "name": "Claws",
+                    "desc": "Melee Weapon Attack: +10 to hit, reach 5 ft., one target. Hit: 17 (3d8 + 4) slashing damage."
+                },
+                {
+                    "name": "Psionic Wave",
+                    "desc": "The dragon psionically emits a wave of crushing mental pressure. Each creature within 20 feet makes a DC 19 Wisdom saving throw  taking 16 (3d10) psychic damage on a failed save or half damage on a success. Creatures charmed by the dragon make this saving throw with disadvantage."
+                },
+                {
+                    "name": "Concussive Breath (Recharge 5-6)",
+                    "desc": "The dragon psionically unleashes telekinetic energy in a 60-foot cone. Each creature in that area makes a DC 18 Constitution saving throw  taking 60 (11d10) force damage on a failed save or half damage on a success."
+                }
+            ],
+            "bonus_actions": null,
+            "reactions": [
+                {
+                    "name": "Assume Control (While Bloodied)",
+                    "desc": "When a creature charmed by the dragon begins its turn, the dragon telepathically commands the charmed creature until the end of the creatures turn. If the dragon commands the creature to take an action that would harm itself or an ally, the creature makes a DC 19 Wisdom saving throw. On a success, the creatures turn immediately ends."
+                }
+            ],
+            "legendary_desc": "",
+            "legendary_actions": [
+                {
+                    "name": "The dragon can take 3 legendary actions",
+                    "desc": "Only one legendary action can be used at a time and only at the end of another creatures turn. It regains spent legendary actions at the start of its turn."
+                },
+                {
+                    "name": "Charm",
+                    "desc": "The dragon targets a creature within 60 feet, forcing it to make a DC 16 Wisdom saving throw. On a failure, the creature is charmed by the dragon for 24 hours, regarding it as a trusted friend to be heeded and protected. Although it isnt under the dragons control, it takes the dragons requests or actions in the most favorable way it can. At the end of each of the targets turns and at the end of any turn during which the dragon or its companions harmed the target, it repeats the saving throw, ending the effect on a success."
+                },
+                {
+                    "name": "Stupefy",
+                    "desc": "The dragon targets a creature within 60 feet. If the target is concentrating on a spell, it must make a DC 19 Constitution saving throw or lose concentration."
+                },
+                {
+                    "name": "Psionic Wave (Costs 2 Actions)",
+                    "desc": "The dragon uses Psionic Wave."
+                },
+                {
+                    "name": "Captivating Harmonics (1/Day)",
+                    "desc": "Each creature of the dragons choice within 90 feet makes a DC 16 Wisdom saving throw. On a failure, it becomes psionically charmed by the dragon for 1 minute. A creature repeats the saving throw at the end of each of its turns, ending the effect on itself on a success."
+                }
+            ],
+            "special_abilities": [
+                {
+                    "name": "Legendary Resistance (3/Day)",
+                    "desc": "When the dragon fails a saving throw, it can choose to succeed instead. When it does, its scales dull briefly, and it can't use telepathy or psionic abilities until the end of its next turn."
+                },
+                {
+                    "name": "Psionic Powers",
+                    "desc": "The dragons psionic abilities are considered both magical and psionic."
+                },
+                {
+                    "name": "Far Thoughts",
+                    "desc": "The dragon is aware of any creature that uses a psionic ability or communicates telepathically within 100 miles of it. As an action, the dragon can psionically observe a creature, object, or location it is familiar with within 100 miles. While observing a subject in this way, the dragon can see, hear, and communicate telepathically, but it is blind and deaf in regard to its physical senses and does not require food or water. The dragon can psionically observe a subject indefinitely and can end this effect and return to its own senses as an action."
+                },
+                {
+                    "name": "Innate Spellcasting",
+                    "desc": "The dragons spellcasting ability is Charisma (save DC 19). It can innately cast the following spells, requiring no material components. 3/day each:calm emotions, charm person, mass suggestion, modify memory"
+                }
+            ],
+            "spell_list": [],
+            "page_no": 141,
+            "environments": [],
+            "img_main": null,
+            "document__slug": "menagerie",
+            "document__title": "Level Up Advanced 5e Monstrous Menagerie",
+            "document__license_url": "http://open5e.com/legal",
+            "document__url": "https://www.levelup5e.com",
+            "v2_converted_path": "/v2/creatures/a5e-mm_adult-amethyst-dragon/"
+        },
+        {
+            "slug": "adult-black-dragon",
+            "desc": "",
+            "name": "Adult Black Dragon",
+            "size": "Huge",
+            "type": "Dragon",
+            "subtype": "",
+            "group": "Black Dragon",
+            "alignment": "chaotic evil",
+            "armor_class": 19,
+            "armor_desc": "natural armor",
+            "hit_points": 195,
+            "hit_dice": "17d12+85",
+            "speed": {
+                "walk": 40,
+                "fly": 80,
+                "swim": 40
+            },
+            "strength": 23,
+            "dexterity": 14,
+            "constitution": 21,
+            "intelligence": 14,
+            "wisdom": 13,
+            "charisma": 17,
+            "strength_save": null,
+            "dexterity_save": 7,
+            "constitution_save": 10,
+            "intelligence_save": null,
+            "wisdom_save": 6,
+            "charisma_save": 8,
+            "perception": 11,
+            "skills": {
+                "perception": 11,
+                "stealth": 7
+            },
+            "damage_vulnerabilities": "",
+            "damage_resistances": "",
+            "damage_immunities": "acid",
+            "condition_immunities": "",
+            "senses": "blindsight 60 ft., darkvision 120 ft., passive Perception 21",
+            "languages": "Common, Draconic",
+            "challenge_rating": "14",
+            "cr": 14.0,
+            "actions": [
+                {
+                    "name": "Multiattack",
+                    "desc": "The dragon can use its Frightful Presence. It then makes three attacks: one with its bite and two with its claws."
+                },
+                {
+                    "name": "Bite",
+                    "desc": "Melee Weapon Attack: +11 to hit, reach 10 ft., one target. Hit: 17 (2d10 + 6) piercing damage plus 4 (1d8) acid damage.",
+                    "attack_bonus": 11,
+                    "damage_dice": "2d10+1d8",
+                    "damage_bonus": 6
+                },
+                {
+                    "name": "Claw",
+                    "desc": "Melee Weapon Attack: +11 to hit, reach 5 ft., one target. Hit: 13 (2d6 + 6) slashing damage.",
+                    "attack_bonus": 11,
+                    "damage_dice": "2d6",
+                    "damage_bonus": 6
+                },
+                {
+                    "name": "Tail",
+                    "desc": "Melee Weapon Attack: +11 to hit, reach 15 ft., one target. Hit: 15 (2d8 + 6) bludgeoning damage.",
+                    "attack_bonus": 11,
+                    "damage_dice": "2d8",
+                    "damage_bonus": 6
+                },
+                {
+                    "name": "Frightful Presence",
+                    "desc": "Each creature of the dragon's choice that is within 120 feet of the dragon and aware of it must succeed on a DC 16 Wisdom saving throw or become frightened for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success. If a creature's saving throw is successful or the effect ends for it, the creature is immune to the dragon's Frightful Presence for the next 24 hours."
+                },
+                {
+                    "name": "Acid Breath (Recharge 5-6)",
+                    "desc": "The dragon exhales acid in a 60-foot line that is 5 feet wide. Each creature in that line must make a DC 18 Dexterity saving throw, taking 54 (12d8) acid damage on a failed save, or half as much damage on a successful one.",
+                    "attack_bonus": 0,
+                    "damage_dice": "12d8"
+                }
+            ],
+            "bonus_actions": null,
+            "reactions": null,
+            "legendary_desc": "The dragon can take 3 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature's turn. The dragon regains spent legendary actions at the start of its turn.",
+            "legendary_actions": [
+                {
+                    "name": "Detect",
+                    "desc": "The dragon makes a Wisdom (Perception) check."
+                },
+                {
+                    "name": "Tail Attack",
+                    "desc": "The dragon makes a tail attack."
+                },
+                {
+                    "name": "Wing Attack (Costs 2 Actions)",
+                    "desc": "The dragon beats its wings. Each creature within 10 ft. of the dragon must succeed on a DC 19 Dexterity saving throw or take 13 (2d6 + 6) bludgeoning damage and be knocked prone. The dragon can then fly up to half its flying speed."
+                }
+            ],
+            "special_abilities": [
+                {
+                    "name": "Amphibious",
+                    "desc": "The dragon can breathe air and water."
+                },
+                {
+                    "name": "Legendary Resistance (3/Day)",
+                    "desc": "If the dragon fails a saving throw, it can choose to succeed instead."
+                }
+            ],
+            "spell_list": [],
+            "page_no": 281,
+            "environments": [
+                "Swamp"
+            ],
+            "img_main": null,
+            "document__slug": "wotc-srd",
+            "document__title": "5e Core Rules",
+            "document__license_url": "http://open5e.com/legal",
+            "document__url": "http://dnd.wizards.com/articles/features/systems-reference-document-srd",
+            "v2_converted_path": "/v2/creatures/srd_adult-black-dragon/"
+        },
+        {
+            "slug": "adult-black-dragon-a5e",
+            "desc": "",
+            "name": "Adult Black Dragon",
+            "size": "Huge",
+            "type": "Dragon",
+            "subtype": "",
+            "group": null,
+            "alignment": "",
+            "armor_class": 19,
+            "armor_desc": "",
+            "hit_points": 253,
+            "hit_dice": "22d12+110",
+            "speed": {
+                "walk": 40,
+                "fly": 80,
+                "swim": 40
+            },
+            "strength": 22,
+            "dexterity": 14,
+            "constitution": 20,
+            "intelligence": 14,
+            "wisdom": 12,
+            "charisma": 16,
+            "strength_save": null,
+            "dexterity_save": 8,
+            "constitution_save": 11,
+            "intelligence_save": null,
+            "wisdom_save": 7,
+            "charisma_save": 9,
+            "perception": null,
+            "skills": {
+                "history": 8,
+                "perception": 7,
+                "stealth": 8
+            },
+            "damage_vulnerabilities": "",
+            "damage_resistances": "",
+            "damage_immunities": "acid",
+            "condition_immunities": "",
+            "senses": "blindsight 60 ft., darkvision 120 ft., passive Perception 20",
+            "languages": "Common, Draconic",
+            "challenge_rating": "17",
+            "cr": 17.0,
+            "actions": [
+                {
+                    "name": "Multiattack",
+                    "desc": "The dragon attacks once with its bite and twice with its claws. In place of its bite attack  it can use Acid Spit."
+                },
+                {
+                    "name": "Bite",
+                    "desc": "Melee Weapon Attack: +12 to hit, reach 10 ft., one target. Hit: 22 (3d10 + 6) piercing damage plus 4 (1d8) acid damage. Instead of dealing piercing damage  the dragon can grapple the target (escape DC 20)  and a Large or smaller creature grappled in this way is restrained. While grappling a creature  the dragon can't bite or use Acid Spit against another target."
+                },
+                {
+                    "name": "Claw",
+                    "desc": "Melee Weapon Attack: +12 to hit, reach 5 ft., one target. Hit: 19 (3d8 + 6) slashing damage."
+                },
+                {
+                    "name": "Tail",
+                    "desc": "Melee Weapon Attack: +12 to hit, reach 15 ft., one target. Hit: 15 (2d8 + 6) bludgeoning damage  and the dragon pushes the target 10 feet away."
+                },
+                {
+                    "name": "Acid Spit",
+                    "desc": "The dragon targets a creature within 60 feet  forcing it to make a DC 19 Dexterity saving throw. The creature takes 22 (4d10) acid damage on a failure or half damage on a success. A creature that fails the save also takes 5 (1d10) ongoing acid damage. A creature can use an action to end the ongoing damage."
+                },
+                {
+                    "name": "Acid Breath (Recharge 5-6)",
+                    "desc": "The dragon exhales sizzling acid in a 60-foot-long  5-foot-wide line. Each creature in that area makes a DC 19 Dexterity saving throw  taking 63 (14d8) acid damage on a failed save or half damage on a success. A creature that fails the save is blinded until the end of its next turn."
+                }
+            ],
+            "bonus_actions": null,
+            "reactions": [
+                {
+                    "name": "Tail Attack",
+                    "desc": "When a creature the dragon can see within 10 feet hits the dragon with a melee attack, the dragon makes a tail attack against it."
+                }
+            ],
+            "legendary_desc": "",
+            "legendary_actions": [
+                {
+                    "name": "The dragon can take 3 legendary actions",
+                    "desc": "Only one legendary action can be used at a time and only at the end of another creatures turn. It regains spent legendary actions at the start of its turn."
+                },
+                {
+                    "name": "Darkness",
+                    "desc": "The dragon creates a 20-foot-radius sphere of magical darkness originating from a point it can see within 120 feet. Darkvision can't penetrate this darkness. The darkness lasts for 1 minute or until the dragon uses this action again."
+                },
+                {
+                    "name": "Roar",
+                    "desc": "Each creature of the dragons choice within 120 feet that can hear it makes a DC 17 Charisma saving throw. On a failure, it is frightened for 1 minute. A creature repeats the saving throw at the end of its turns, ending the effect on itself on a success. When it succeeds on a saving throw or the effect ends for it, it is immune to Roar for 24 hours."
+                },
+                {
+                    "name": "Wing Attack",
+                    "desc": "The dragon beats its wings. Each creature within 15 feet makes a DC 20 Dexterity saving throw. On a failure, it is pushed 10 feet away and knocked prone. The dragon can then fly up to half its fly speed."
+                }
+            ],
+            "special_abilities": [
+                {
+                    "name": "Ambusher",
+                    "desc": "When submerged in water, the dragon has advantage on Stealth checks. If the dragon hits a creature that can't see it with its bite, it can deal piercing damage and grapple the target simultaneously."
+                },
+                {
+                    "name": "Amphibious",
+                    "desc": "The dragon can breathe air and water."
+                },
+                {
+                    "name": "Legendary Resistance (3/Day)",
+                    "desc": "When the dragon fails a saving throw, it can choose to succeed instead. When it does, it sheds some of its scales, which turn to mud. If it has no more uses of this ability, its Armor Class is reduced to 17 until it finishes a long rest."
+                },
+                {
+                    "name": "Ruthless (1/Round)",
+                    "desc": "After scoring a critical hit on its turn, the dragon can immediately make one claw attack."
+                },
+                {
+                    "name": "Innate Spellcasting",
+                    "desc": "The dragons spellcasting ability is Charisma (save DC 17). It can innately cast the following spells, requiring no material components. 3/day each:fog cloud, pass without trace, legend lore, speak with dead"
+                }
+            ],
+            "spell_list": [],
+            "page_no": 102,
+            "environments": [],
+            "img_main": null,
+            "document__slug": "menagerie",
+            "document__title": "Level Up Advanced 5e Monstrous Menagerie",
+            "document__license_url": "http://open5e.com/legal",
+            "document__url": "https://www.levelup5e.com",
+            "v2_converted_path": "/v2/creatures/a5e-mm_adult-black-dragon/"
+        },
+        {
+            "slug": "adult-black-dragon-lich-a5e",
+            "desc": "",
+            "name": "Adult Black Dragon Lich",
+            "size": "Huge",
+            "type": "Undead",
+            "subtype": "",
+            "group": null,
+            "alignment": "",
+            "armor_class": 19,
+            "armor_desc": "",
+            "hit_points": 253,
+            "hit_dice": "22d12+110",
+            "speed": {
+                "walk": 40,
+                "fly": 80,
+                "swim": 40
+            },
+            "strength": 22,
+            "dexterity": 14,
+            "constitution": 20,
+            "intelligence": 14,
+            "wisdom": 12,
+            "charisma": 16,
+            "strength_save": null,
+            "dexterity_save": 8,
+            "constitution_save": 11,
+            "intelligence_save": null,
+            "wisdom_save": 7,
+            "charisma_save": 9,
+            "perception": null,
+            "skills": {
+                "history": 8,
+                "perception": 7,
+                "stealth": 8
+            },
+            "damage_vulnerabilities": "",
+            "damage_resistances": "",
+            "damage_immunities": "acid, necrotic, poison",
+            "condition_immunities": "charmed, fatigued, frightened, paralyzed, poisoned",
+            "senses": "blindsight 60 ft., darkvision 120 ft., passive Perception 20",
+            "languages": "Common, Draconic",
+            "challenge_rating": "17",
+            "cr": 17.0,
+            "actions": [
+                {
+                    "name": "Multiattack",
+                    "desc": "The dragon attacks once with its bite and twice with its claws. In place of its bite attack  it can use Acid Spit."
+                },
+                {
+                    "name": "Bite",
+                    "desc": "Melee Weapon Attack: +12 to hit, reach 10 ft., one target. Hit: 22 (3d10 + 6) piercing damage plus 4 (1d8) acid damage. Instead of dealing piercing damage  the dragon can grapple the target (escape DC 20)  and a Large or smaller creature grappled in this way is restrained. While grappling a creature  the dragon can't bite or use Acid Spit against another target."
+                },
+                {
+                    "name": "Claw",
+                    "desc": "Melee Weapon Attack: +12 to hit, reach 5 ft., one target. Hit: 19 (3d8 + 6) slashing damage."
+                },
+                {
+                    "name": "Tail",
+                    "desc": "Melee Weapon Attack: +12 to hit, reach 15 ft., one target. Hit: 15 (2d8 + 6) bludgeoning damage  and the dragon pushes the target 10 feet away."
+                },
+                {
+                    "name": "Acid Spit",
+                    "desc": "The dragon targets a creature within 60 feet  forcing it to make a DC 19 Dexterity saving throw. The creature takes 22 (4d10) acid damage on a failure or half damage on a success. A creature that fails the save also takes 5 (1d10) ongoing acid damage. A creature can use an action to end the ongoing damage."
+                },
+                {
+                    "name": "Acid Breath (Recharge 5-6)",
+                    "desc": "The dragon exhales sizzling acid or necrotic energy in a 60-foot-long  5-foot-wide line. Each creature in that area makes a DC 19 Dexterity saving throw  taking 31 (7d8) acid damage and 31 (7d8) necrotic damage on a failed save or half damage on a success. A creature that fails the save is blinded until the end of its next turn."
+                }
+            ],
+            "bonus_actions": null,
+            "reactions": [
+                {
+                    "name": "Tail Attack",
+                    "desc": "When a creature the dragon can see within 10 feet hits the dragon with a melee attack, the dragon makes a tail attack against it."
+                }
+            ],
+            "legendary_desc": "",
+            "legendary_actions": [
+                {
+                    "name": "The dragon can take 3 legendary actions",
+                    "desc": "Only one legendary action can be used at a time and only at the end of another creatures turn. It regains spent legendary actions at the start of its turn."
+                },
+                {
+                    "name": "Darkness",
+                    "desc": "The dragon creates a 20-foot-radius sphere of magical darkness originating from a point it can see within 120 feet. Darkvision can't penetrate this darkness. The darkness lasts for 1 minute or until the dragon uses this action again."
+                },
+                {
+                    "name": "Roar",
+                    "desc": "Each creature of the dragons choice within 120 feet that can hear it makes a DC 17 Charisma saving throw. On a failure, it is frightened for 1 minute. A creature repeats the saving throw at the end of its turns, ending the effect on itself on a success. When it succeeds on a saving throw or the effect ends for it, it is immune to Roar for 24 hours."
+                },
+                {
+                    "name": "Wing Attack",
+                    "desc": "The dragon beats its wings. Each creature within 15 feet makes a DC 20 Dexterity saving throw. On a failure, it is pushed 10 feet away and knocked prone. The dragon can then fly up to half its fly speed."
+                }
+            ],
+            "special_abilities": [
+                {
+                    "name": "Ambusher",
+                    "desc": "When submerged in water, the dragon has advantage on Stealth checks. If the dragon hits a creature that can't see it with its bite, it can deal piercing damage and grapple the target simultaneously."
+                },
+                {
+                    "name": "Innate Spellcasting",
+                    "desc": "The dragons spellcasting ability is Charisma (save DC 17). It can innately cast the following spells, requiring no material components. 3/day each: animate dead, fog cloud, legend lore, pass without trace, speak with dead"
+                }
+            ],
+            "spell_list": [],
+            "page_no": 96,
+            "environments": [],
+            "img_main": null,
+            "document__slug": "menagerie",
+            "document__title": "Level Up Advanced 5e Monstrous Menagerie",
+            "document__license_url": "http://open5e.com/legal",
+            "document__url": "https://www.levelup5e.com",
+            "v2_converted_path": "/v2/creatures/a5e-mm_adult-black-dragon-lich/"
+        },
+        {
+            "slug": "adult-blue-dragon",
+            "desc": "",
+            "name": "Adult Blue Dragon",
+            "size": "Huge",
+            "type": "Dragon",
+            "subtype": "",
+            "group": "Blue Dragon",
+            "alignment": "lawful evil",
+            "armor_class": 19,
+            "armor_desc": "natural armor",
+            "hit_points": 225,
+            "hit_dice": "18d12+108",
+            "speed": {
+                "walk": 40,
+                "burrow": 30,
+                "fly": 80
+            },
+            "strength": 25,
+            "dexterity": 10,
+            "constitution": 23,
+            "intelligence": 16,
+            "wisdom": 15,
+            "charisma": 19,
+            "strength_save": null,
+            "dexterity_save": 5,
+            "constitution_save": 11,
+            "intelligence_save": null,
+            "wisdom_save": 7,
+            "charisma_save": 9,
+            "perception": 12,
+            "skills": {
+                "perception": 12,
+                "stealth": 5
+            },
+            "damage_vulnerabilities": "",
+            "damage_resistances": "",
+            "damage_immunities": "lightning",
+            "condition_immunities": "",
+            "senses": "blindsight 60 ft., darkvision 120 ft., passive Perception 22",
+            "languages": "Common, Draconic",
+            "challenge_rating": "16",
+            "cr": 16.0,
+            "actions": [
+                {
+                    "name": "Multiattack",
+                    "desc": "The dragon can use its Frightful Presence. It then makes three attacks: one with its bite and two with its claws."
+                },
+                {
+                    "name": "Bite",
+                    "desc": "Melee Weapon Attack: +12 to hit, reach 10 ft., one target. Hit: 18 (2d10 + 7) piercing damage plus 5 (1d10) lightning damage.",
+                    "attack_bonus": 12,
+                    "damage_dice": "2d10+1d10",
+                    "damage_bonus": 7
+                },
+                {
+                    "name": "Claw",
+                    "desc": "Melee Weapon Attack: +12 to hit, reach 5 ft., one target. Hit: 14 (2d6 + 7) slashing damage.",
+                    "attack_bonus": 12,
+                    "damage_dice": "2d6",
+                    "damage_bonus": 7
+                },
+                {
+                    "name": "Tail",
+                    "desc": "Melee Weapon Attack: +12 to hit, reach 15 ft., one target. Hit: 16 (2d8 + 7) bludgeoning damage.",
+                    "attack_bonus": 12,
+                    "damage_dice": "2d8",
+                    "damage_bonus": 7
+                },
+                {
+                    "name": "Frightful Presence",
+                    "desc": "Each creature of the dragon's choice that is within 120 ft. of the dragon and aware of it must succeed on a DC 17 Wisdom saving throw or become frightened for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success. If a creature's saving throw is successful or the effect ends for it, the creature is immune to the dragon's Frightful Presence for the next 24 hours."
+                },
+                {
+                    "name": "Lightning Breath (Recharge 5-6)",
+                    "desc": "The dragon exhales lightning in a 90-foot line that is 5 ft. wide. Each creature in that line must make a DC 19 Dexterity saving throw, taking 66 (12d10) lightning damage on a failed save, or half as much damage on a successful one.",
+                    "attack_bonus": 0,
+                    "damage_dice": "12d10"
+                }
+            ],
+            "bonus_actions": null,
+            "reactions": null,
+            "legendary_desc": "The dragon can take 3 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature's turn. The dragon regains spent legendary actions at the start of its turn.",
+            "legendary_actions": [
+                {
+                    "name": "Detect",
+                    "desc": "The dragon makes a Wisdom (Perception) check."
+                },
+                {
+                    "name": "Tail Attack",
+                    "desc": "The dragon makes a tail attack."
+                },
+                {
+                    "name": "Wing Attack (Costs 2 Actions)",
+                    "desc": "The dragon beats its wings. Each creature within 10 ft. of the dragon must succeed on a DC 20 Dexterity saving throw or take 14 (2d6 + 7) bludgeoning damage and be knocked prone. The dragon can then fly up to half its flying speed."
+                }
+            ],
+            "special_abilities": [
+                {
+                    "name": "Legendary Resistance (3/Day)",
+                    "desc": "If the dragon fails a saving throw, it can choose to succeed instead."
+                }
+            ],
+            "spell_list": [],
+            "page_no": 283,
+            "environments": [
+                "Desert",
+                "Coastal"
+            ],
+            "img_main": null,
+            "document__slug": "wotc-srd",
+            "document__title": "5e Core Rules",
+            "document__license_url": "http://open5e.com/legal",
+            "document__url": "http://dnd.wizards.com/articles/features/systems-reference-document-srd",
+            "v2_converted_path": "/v2/creatures/srd_adult-blue-dragon/"
+        }
+    ]
+}
