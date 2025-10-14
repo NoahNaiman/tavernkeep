@@ -6,7 +6,11 @@ use serde_json::{Value, json};
 use tower::ServiceExt;
 
 async fn post_roll(body: &str) -> (StatusCode, Value) {
-    let resp = tavernkeep::api::router()
+    let (router, _) = tavernkeep::app(
+        tavernkeep::config::Config::default(),
+        tavernkeep::clock::SystemClock::shared(),
+    );
+    let resp = router
         .oneshot(
             Request::post("/roll")
                 .header("content-type", "application/json")
