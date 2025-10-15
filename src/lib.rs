@@ -1,12 +1,16 @@
 //! Tavernkeep: a fast, outage-proof D&D 5e SRD lookup API.
 
 pub mod api;
+pub mod backoff;
+pub mod breaker;
+pub mod cache;
 pub mod clock;
 pub mod config;
 pub mod dice;
 pub mod open5e;
 pub mod service;
 pub mod telemetry;
+pub mod upstream;
 
 use std::sync::Arc;
 
