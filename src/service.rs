@@ -1,17 +1,19 @@
 //! Lookups against Open5e, shaped into internal models.
 
 use std::sync::Arc;
-use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::Duration;
 
 use bytes::Bytes;
 use serde::Serialize;
 
 use crate::api::ApiError;
+use crate::breaker::BreakerState;
+use crate::cache::{Cached, SwrCache, Ttls};
 use crate::clock::SharedClock;
 use crate::config::Config;
 use crate::open5e::models::{RawMonster, RawSearchPage, RawSpell};
-use crate::open5e::{Client, Fetched, Monster, SearchResults, Spell, UpstreamError};
+use crate::open5e::{Monster, SearchResults, Spell, UpstreamError};
+use crate::upstream::Upstream;
 
 /// A serialized model with its ETag, ready to serve.
 #[derive(Debug)]
@@ -115,22 +117,40 @@ pub fn upstream_to_api(e: &UpstreamError) -> ApiError {
     }
 }
 
+pub type SpellDoc = Arc<Doc<Spell>>;
+pub type MonsterDoc = Arc<Doc<Monster>>;
+pub type SearchDoc = Arc<Doc<SearchResults>>;
+
 pub struct Service {
     config: Arc<Config>,
-    client: Client,
-    clock: SharedClock,
-    /// Clock reading (ms) + 1 of the last upstream success; 0 means never.
-    last_contact_ms: AtomicU64,
+    upstream: Arc<Upstream>,
+    spells: SwrCache<SpellDoc>,
+    monsters: SwrCache<MonsterDoc>,
+    searches: SwrCache<SearchDoc>,
 }
 
 impl Service {
     pub fn new(config: Arc<Config>, clock: SharedClock) -> Self {
-        let client = Client::new(config.upstream_url.clone(), config.upstream_timeout);
+        let upstream = Upstream::new(&config, clock.clone());
+        let lookup_ttls = Ttls {
+            fresh: config.fresh_ttl,
+            stale: config.stale_ttl,
+            negative: config.negative_ttl,
+        };
+        // Search results are only cached while fresh; stale search pages are
+        // not served.
+        let search_ttls = Ttls {
+            fresh: config.search_ttl,
+            stale: config.search_ttl,
+            negative: config.negative_ttl,
+        };
+        let cap = config.cache_capacity;
         Service {
+            spells: SwrCache::new(lookup_ttls, cap, clock.clone()),
+            monsters: SwrCache::new(lookup_ttls, cap, clock.clone()),
+            searches: SwrCache::new(search_ttls, cap, clock),
+            upstream,
             config,
-            client,
-            clock,
-            last_contact_ms: AtomicU64::new(0),
         }
     }
 
@@ -138,85 +158,93 @@ impl Service {
         &self.config
     }
 
+    pub fn breaker_state(&self) -> BreakerState {
+        self.upstream.breaker_state()
+    }
+
     pub async fn spell(&self, slug: &str) -> Result<Lookup<Spell>, ApiError> {
         validate_slug(slug)?;
-        let raw: RawSpell = self.fetch_one(Kind::Spell, slug).await?;
-        Ok(self.fresh(Spell::from(raw)))
+        let up = self.upstream.clone();
+        let path = format!("spells/{slug}/");
+        let fetch = move || async move {
+            up.get::<RawSpell>(&path, &[])
+                .await
+                .map(|f| f.map(|raw| Arc::new(Doc::new(Spell::from(raw)))))
+        };
+        let cached = self.spells.get(slug, fetch).await;
+        self.finish(Kind::Spell, slug, cached)
     }
 
     pub async fn monster(&self, slug: &str) -> Result<Lookup<Monster>, ApiError> {
         validate_slug(slug)?;
-        let raw: RawMonster = self.fetch_one(Kind::Monster, slug).await?;
-        Ok(self.fresh(Monster::from(raw)))
+        let up = self.upstream.clone();
+        let path = format!("monsters/{slug}/");
+        let fetch = move || async move {
+            up.get::<RawMonster>(&path, &[])
+                .await
+                .map(|f| f.map(|raw| Arc::new(Doc::new(Monster::from(raw)))))
+        };
+        let cached = self.monsters.get(slug, fetch).await;
+        self.finish(Kind::Monster, slug, cached)
     }
 
     pub async fn search(&self, kind: Kind, q: &str) -> Result<Lookup<SearchResults>, ApiError> {
-        let q = validate_query(q)?;
+        let q = validate_query(q)?.to_string();
+        let key = format!("{}:{}", kind.as_str(), q.to_lowercase());
+        let up = self.upstream.clone();
         let path = format!("{}/", kind.collection());
-        let page: RawSearchPage = match self
-            .record(
-                self.client
-                    .get_json(&path, &[("search", q), ("limit", "20")])
-                    .await,
-            )
-            .map_err(|e| upstream_to_api(&e))?
-        {
-            Fetched::Found(p) => p,
-            Fetched::NotFound => return Err(ApiError::NotFound("search not found".to_string())),
+        let query = q.clone();
+        let fetch = move || async move {
+            up.get::<RawSearchPage>(&path, &[("search", query.as_str()), ("limit", "20")])
+                .await
+                .map(|f| f.map(|page| Arc::new(Doc::new(page.into_results(kind.as_str(), &query)))))
         };
-        Ok(Lookup {
-            doc: Arc::new(Doc::new(page.into_results(kind.as_str(), q))),
-            max_age: self.config.search_ttl,
-        })
+        let cached = self.searches.get(&key, fetch).await;
+        match cached.map_err(|e| upstream_to_api(&e))? {
+            Cached::Fresh { value, remaining } => Ok(Lookup {
+                doc: value,
+                max_age: remaining,
+            }),
+            Cached::Stale { value } => Ok(Lookup {
+                doc: value,
+                max_age: Duration::ZERO,
+            }),
+            Cached::NotFound => Err(ApiError::NotFound(format!("no results for {q:?}"))),
+        }
     }
 
-    async fn fetch_one<R: serde::de::DeserializeOwned>(
+    fn finish<T>(
         &self,
         kind: Kind,
         slug: &str,
-    ) -> Result<R, ApiError> {
-        let path = format!("{}/{slug}/", kind.collection());
-        match self
-            .record(self.client.get_json(&path, &[]).await)
-            .map_err(|e| upstream_to_api(&e))?
-        {
-            Fetched::Found(r) => Ok(r),
-            Fetched::NotFound => Err(ApiError::NotFound(format!(
+        cached: Result<Cached<Arc<Doc<T>>>, UpstreamError>,
+    ) -> Result<Lookup<T>, ApiError> {
+        match cached.map_err(|e| upstream_to_api(&e))? {
+            Cached::Fresh { value, remaining } => Ok(Lookup {
+                doc: value,
+                max_age: remaining,
+            }),
+            Cached::Stale { value } => Ok(Lookup {
+                doc: value,
+                max_age: Duration::ZERO,
+            }),
+            Cached::NotFound => Err(ApiError::NotFound(format!(
                 "no {} named {slug:?}",
                 kind.as_str()
             ))),
         }
     }
 
-    fn fresh<T: Serialize>(&self, value: T) -> Lookup<T> {
-        Lookup {
-            doc: Arc::new(Doc::new(value)),
-            max_age: self.config.fresh_ttl,
-        }
-    }
-
-    fn record<T>(&self, r: Result<T, UpstreamError>) -> Result<T, UpstreamError> {
-        if r.is_ok() {
-            let now = u64::try_from(self.clock.now().as_millis()).unwrap_or(u64::MAX);
-            self.last_contact_ms
-                .store(now.saturating_add(1), Ordering::Relaxed);
-        }
-        r
-    }
-
     /// Whether Open5e answered within the readiness window.
     pub fn upstream_recently_reachable(&self) -> bool {
-        let last = self.last_contact_ms.load(Ordering::Relaxed);
-        if last == 0 {
-            return false;
-        }
-        let now = u64::try_from(self.clock.now().as_millis()).unwrap_or(u64::MAX);
-        now.saturating_sub(last - 1) <= self.config.ready_window.as_millis() as u64
+        self.upstream.recently_reachable()
     }
 
-    /// Number of cached entries (lookups are not cached yet).
+    /// Number of cached entries across all caches.
     pub async fn cached_entries(&self) -> u64 {
-        0
+        self.spells.entry_count().await
+            + self.monsters.entry_count().await
+            + self.searches.entry_count().await
     }
 }
 

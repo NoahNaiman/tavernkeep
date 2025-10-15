@@ -11,6 +11,15 @@ pub enum Fetched<T> {
     NotFound,
 }
 
+impl<T> Fetched<T> {
+    pub fn map<U>(self, f: impl FnOnce(T) -> U) -> Fetched<U> {
+        match self {
+            Fetched::Found(t) => Fetched::Found(f(t)),
+            Fetched::NotFound => Fetched::NotFound,
+        }
+    }
+}
+
 /// Why an upstream call failed.
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
 pub enum UpstreamError {
