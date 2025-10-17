@@ -24,7 +24,12 @@ pub struct Upstream {
     ready_window: Duration,
     /// Clock reading (ms) + 1 of the last upstream success; 0 means never.
     last_contact_ms: AtomicU64,
+    /// When the last readiness probe started; held while a probe runs.
+    last_probe: tokio::sync::Mutex<Option<Duration>>,
 }
+
+/// Minimum spacing between readiness probes.
+pub const PROBE_INTERVAL: Duration = Duration::from_secs(5);
 
 impl Upstream {
     pub fn new(config: &Config, clock: SharedClock) -> Arc<Self> {
@@ -42,6 +47,7 @@ impl Upstream {
             clock,
             ready_window: config.ready_window,
             last_contact_ms: AtomicU64::new(0),
+            last_probe: tokio::sync::Mutex::new(None),
         })
     }
 
@@ -94,6 +100,33 @@ impl Upstream {
         let now = u64::try_from(self.clock.now().as_millis()).unwrap_or(u64::MAX);
         self.last_contact_ms
             .store(now.saturating_add(1), Ordering::Relaxed);
+    }
+
+    /// Like [`Self::recently_reachable`], but when contact is stale, send a
+    /// cheap probe (`documents/?limit=1`). At most one probe runs at a time
+    /// and probes are spaced by [`PROBE_INTERVAL`]. The probe bypasses the
+    /// breaker: it answers "is Open5e reachable", not "may we call it".
+    pub async fn probe_if_stale(&self) -> bool {
+        if self.recently_reachable() {
+            return true;
+        }
+        let Ok(mut last) = self.last_probe.try_lock() else {
+            return false;
+        };
+        let now = self.clock.now();
+        if last.is_some_and(|t| now.saturating_sub(t) < PROBE_INTERVAL) {
+            return false;
+        }
+        *last = Some(now);
+        let ok = self
+            .client
+            .get_json::<serde_json::Value>("documents/", &[("limit", "1")])
+            .await
+            .is_ok();
+        if ok {
+            self.mark_contact();
+        }
+        ok
     }
 
     /// Whether Open5e answered within the readiness window.

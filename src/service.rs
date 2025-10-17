@@ -240,6 +240,11 @@ impl Service {
         self.upstream.recently_reachable()
     }
 
+    /// Readiness check for Open5e that probes when contact is stale.
+    pub async fn upstream_reachable_now(&self) -> bool {
+        self.upstream.probe_if_stale().await
+    }
+
     /// Number of cached entries across all caches.
     pub async fn cached_entries(&self) -> u64 {
         self.spells.entry_count().await

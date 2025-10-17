@@ -1,0 +1,20 @@
+{
+    "count": 17,
+    "next": "https://api.open5e.com/v1/documents/?limit=1&page=2",
+    "previous": null,
+    "results": [
+        {
+            "title": "Open5e Original Content",
+            "slug": "o5e",
+            "url": "open5e.com",
+            "license": "Open Gaming License",
+            "desc": "Open5e Original Content",
+            "author": "Ean Moody and Open Source Contributors from github.com/open5e-api",
+            "organization": "Open5e",
+            "version": "1.0",
+            "copyright": "Open5e.com Copyright 2019.",
+            "license_url": "http://open5e.com/legal",
+            "v2_related_key": "open5e"
+        }
+    ]
+}

@@ -2,6 +2,8 @@
 
 mod common;
 
+use std::time::Duration;
+
 use axum::http::StatusCode;
 use common::*;
 use wiremock::matchers::any;
@@ -114,16 +116,55 @@ async fn healthz_is_always_ok() {
 }
 
 #[tokio::test]
-async fn readyz_tracks_recent_upstream_contact() {
-    let (_s, app) = app_with_fixtures().await;
+async fn readyz_probes_upstream_when_idle_and_cache_is_empty() {
+    let (s, app) = app_with_fixtures().await;
+    // Fresh instance, no traffic yet: the probe makes it ready.
+    let r = app.get("/readyz").await;
+    assert_eq!(r.status, StatusCode::OK);
+    assert_eq!(r.json["upstream_reachable"], true);
+    assert_eq!(hits(&s, "/documents/").await, 1);
+
+    // Within the 60s window no new probe is sent.
+    app.clock.advance(Duration::from_secs(59));
+    assert_eq!(app.get("/readyz").await.status, StatusCode::OK);
+    assert_eq!(hits(&s, "/documents/").await, 1);
+
+    // Window expires and Open5e is down: not ready.
+    s.reset().await;
+    Mock::given(any())
+        .respond_with(ResponseTemplate::new(500))
+        .mount(&s)
+        .await;
+    app.clock.advance(Duration::from_secs(2));
+    let r = app.get("/readyz").await;
+    assert_eq!(r.status, StatusCode::SERVICE_UNAVAILABLE);
+    assert_eq!(r.json["upstream_reachable"], false);
+    assert_eq!(r.json["cached_entries"], 0);
+    assert_eq!(s.received_requests().await.unwrap().len(), 1);
+
+    // Probes are rate-limited.
     assert_eq!(
         app.get("/readyz").await.status,
         StatusCode::SERVICE_UNAVAILABLE
     );
+    assert_eq!(s.received_requests().await.unwrap().len(), 1);
+
+    // Open5e comes back; after the probe interval the instance is ready again.
+    s.reset().await;
+    mount_fixtures(&s).await;
+    app.clock.advance(Duration::from_secs(5));
+    assert_eq!(app.get("/readyz").await.status, StatusCode::OK);
+}
+
+#[tokio::test]
+async fn lookups_count_as_upstream_contact_for_60_seconds() {
+    let (_s, app) = app_with_fixtures().await;
     assert_eq!(app.get("/spells/fireball").await.status, StatusCode::OK);
-    let r = app.get("/readyz").await;
-    assert_eq!(r.status, StatusCode::OK);
-    assert_eq!(r.json["upstream_reachable"], true);
+    assert!(app.state.service.upstream_recently_reachable());
+    app.clock.advance(Duration::from_secs(60));
+    assert!(app.state.service.upstream_recently_reachable());
+    app.clock.advance(Duration::from_secs(1));
+    assert!(!app.state.service.upstream_recently_reachable());
 }
 
 #[tokio::test]

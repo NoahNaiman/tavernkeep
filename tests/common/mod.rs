@@ -108,6 +108,11 @@ pub async fn mount_fixtures(server: &MockServer) {
             .await;
     }
     Mock::given(method("GET"))
+        .and(path("/documents/"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(fixture("documents.json")))
+        .mount(server)
+        .await;
+    Mock::given(method("GET"))
         .and(path("/spells/"))
         .and(query_param("search", "fire"))
         .respond_with(ResponseTemplate::new(200).set_body_json(fixture("search/spells-fire.json")))
