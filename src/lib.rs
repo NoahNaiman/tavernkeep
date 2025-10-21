@@ -11,6 +11,7 @@ pub mod open5e;
 pub mod service;
 pub mod telemetry;
 pub mod upstream;
+pub mod warm;
 
 use std::sync::Arc;
 

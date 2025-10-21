@@ -1,0 +1,11 @@
+# Prefetch before game night: `tavernkeep warm --file party.example.txt`
+spell fireball
+spell magic-missile
+spell cure-wounds
+spell shield
+spell wish
+monster goblin
+monster orc
+monster zombie
+monster adult-red-dragon
+monster lich
