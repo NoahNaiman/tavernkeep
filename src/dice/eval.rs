@@ -131,6 +131,24 @@ mod tests {
         assert_eq!(out.expr, "adv+3");
     }
 
+    /// Pins seeded output so a `rand` upgrade that changes `StdRng` streams
+    /// is caught: "the same seed always gives the same result".
+    #[test]
+    fn golden_seeded_roll() {
+        let out = roll("4d6kh3+2", Some(42)).unwrap();
+        assert_eq!(out.rolls[0].results, vec![1, 4, 2, 4]);
+        assert_eq!(out.rolls[0].kept, vec![4, 2, 4]);
+        assert_eq!(out.total, 12);
+    }
+
+    #[test]
+    fn different_seeds_give_different_rolls() {
+        let distinct: std::collections::HashSet<Vec<u32>> = (0..50)
+            .map(|s| roll("10d20", Some(s)).unwrap().rolls[0].results.clone())
+            .collect();
+        assert!(distinct.len() > 45, "{}", distinct.len());
+    }
+
     #[test]
     fn same_seed_same_outcome() {
         assert_eq!(roll("8d6+2d20kh1", Some(42)), roll("8d6+2d20kh1", Some(42)));

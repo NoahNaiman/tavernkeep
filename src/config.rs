@@ -102,7 +102,7 @@ impl Config {
             None => d.bind,
             Some(raw) => raw.trim().parse().map_err(|_| ConfigError {
                 var: "TK_BIND",
-                reason: format!("expected host:port, got {raw:?}"),
+                reason: format!("expected an IP address and port like 0.0.0.0:8080, got {raw:?}"),
             })?,
         };
         let upstream_url = match get("TK_UPSTREAM_URL") {

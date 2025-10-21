@@ -101,8 +101,10 @@ proptest! {
     }
 
     #[test]
-    fn random_strings_never_panic(input in "\\PC{0,64}") {
-        let _ = parse(&input);
+    fn random_strings_never_panic(input in "\\PC{0,300}") {
+        if let Err(e) = parse(&input) {
+            prop_assert!(e.position <= input.chars().count());
+        }
     }
 
     #[test]

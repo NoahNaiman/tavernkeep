@@ -113,7 +113,8 @@ pub fn upstream_to_api(e: &UpstreamError) -> ApiError {
             message: "Open5e is unavailable and this entry is not cached".to_string(),
             retry_after: retry_after.as_secs().max(1),
         },
-        other => ApiError::BadGateway(other.to_string()),
+        // Details (URLs, library errors) stay in the logs, not in responses.
+        other => ApiError::BadGateway(format!("Open5e request failed ({})", other.outcome())),
     }
 }
 

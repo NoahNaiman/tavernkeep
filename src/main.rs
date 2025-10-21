@@ -21,7 +21,17 @@ async fn main() {
 async fn serve(config: Config) -> std::io::Result<()> {
     let bind = config.bind;
     let upstream = config.upstream_url.clone();
-    let (router, _state) = tavernkeep::app(config, SystemClock::shared());
+    let (router, state) = tavernkeep::app(config, SystemClock::shared());
+    // The Prometheus recorder needs periodic upkeep to drain histogram
+    // samples when nothing scrapes /metrics.
+    let metrics = state.metrics.clone();
+    tokio::spawn(async move {
+        let mut tick = tokio::time::interval(std::time::Duration::from_secs(5));
+        loop {
+            tick.tick().await;
+            metrics.run_upkeep();
+        }
+    });
     let listener = tokio::net::TcpListener::bind(bind).await?;
     tracing::info!(%bind, %upstream, "tavernkeep listening");
     axum::serve(listener, router)

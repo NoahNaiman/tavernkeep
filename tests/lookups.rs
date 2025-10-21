@@ -167,6 +167,52 @@ async fn lookups_count_as_upstream_contact_for_60_seconds() {
     assert!(!app.state.service.upstream_recently_reachable());
 }
 
+/// Value of the first Prometheus sample line starting with `series`.
+fn sample(text: &str, series: &str) -> f64 {
+    text.lines()
+        .find(|l| l.starts_with(series))
+        .and_then(|l| l.rsplit(' ').next())
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(0.0)
+}
+
+#[tokio::test]
+async fn metrics_counters_increase_with_this_tests_traffic() {
+    let (_s, app) = app_with_fixtures().await;
+    // A route+status pair no other test produces: 404 on /monsters/{slug}.
+    let series = "tk_requests_total{route=\"/monsters/{slug}\",status=\"404\"}";
+    let before = sample(&app.get("/metrics").await.text, series);
+    for _ in 0..3 {
+        app.get("/monsters/metrics-probe-missing").await;
+    }
+    let after = sample(&app.get("/metrics").await.text, series);
+    assert!(after - before >= 3.0, "{before} -> {after}");
+
+    let rolls_before = sample(&app.get("/metrics").await.text, "tk_rolls_total");
+    let r = app
+        .request(
+            axum::http::Request::post("/roll")
+                .header("content-type", "application/json")
+                .body(axum::body::Body::from(r#"{"expr":"1d20"}"#))
+                .unwrap(),
+        )
+        .await;
+    assert_eq!(r.status, StatusCode::OK);
+    let text = app.get("/metrics").await.text;
+    assert!(sample(&text, "tk_rolls_total") >= rolls_before + 1.0);
+    assert!(text.contains("tk_cache_events_total"), "{text}");
+    assert!(text.contains("tk_breaker_open"), "{text}");
+}
+
+#[tokio::test]
+async fn upstream_errors_do_not_leak_internal_urls() {
+    let app = TestApp::new(test_config("http://127.0.0.1:9"));
+    let r = app.get("/spells/fireball").await;
+    assert_eq!(r.status, StatusCode::BAD_GATEWAY);
+    assert!(!r.text.contains("127.0.0.1"), "{}", r.text);
+    assert_eq!(r.json["message"], "Open5e request failed (connect_error)");
+}
+
 #[tokio::test]
 async fn metrics_expose_request_counters() {
     let (_s, app) = app_with_fixtures().await;

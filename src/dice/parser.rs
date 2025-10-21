@@ -35,6 +35,15 @@ pub const MAX_INPUT_LEN: usize = 256;
 ///
 /// Errors carry the 0-based position of the offending character.
 pub fn parse(input: &str) -> Result<Expr, DiceError> {
+    // The grammar is pure ASCII, so the first non-ASCII character is always
+    // an error. Rejecting it first keeps every later position a valid
+    // character index (byte offsets equal char offsets in ASCII).
+    if let Some((position, c)) = input.chars().enumerate().find(|(_, c)| !c.is_ascii()) {
+        return Err(DiceError::new(
+            format!("unexpected character '{c}'"),
+            position,
+        ));
+    }
     if input.len() > MAX_INPUT_LEN {
         return Err(DiceError::new(
             format!("expression is longer than {MAX_INPUT_LEN} characters"),
@@ -422,6 +431,16 @@ mod tests {
     #[test]
     fn overlong_input_is_rejected() {
         let input = "1+".repeat(200);
-        assert!(err(&input).message.contains("longer"));
+        let e = err(&input);
+        assert!(e.message.contains("longer"));
+        assert_eq!(e.position, MAX_INPUT_LEN);
+    }
+
+    #[test]
+    fn non_ascii_is_reported_at_its_character_index() {
+        let e = err("1d6+é");
+        assert_eq!(e.position, 4);
+        let e = err(&"é".repeat(129));
+        assert_eq!(e.position, 0);
     }
 }
