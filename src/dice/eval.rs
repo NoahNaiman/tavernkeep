@@ -155,6 +155,16 @@ mod tests {
     }
 
     #[test]
+    fn notation_round_trips() {
+        for input in ["2d6+1d8-1", "-3+1d4", "2d20kh1+5", "4d6dl1"] {
+            assert_eq!(parse(input).unwrap().notation(), input);
+        }
+        assert_eq!(parse("adv").unwrap().notation(), "2d20kh1");
+        assert_eq!(parse("1d6").unwrap().plus_const(-2).notation(), "1d6-2");
+        assert_eq!(parse("1d6").unwrap().plus_const(0).notation(), "1d6");
+    }
+
+    #[test]
     fn doubled_dice_doubles_counts_and_keeps() {
         let doubled = parse("2d6+1d8kh1+3").unwrap().with_doubled_dice();
         let out = evaluate("crit", &doubled, &mut rng_for(Some(3)));

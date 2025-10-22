@@ -98,6 +98,36 @@ impl Expr {
         self.terms.iter().map(|t| t.bounds().1).sum()
     }
 
+    /// Canonical notation for the whole expression, e.g. `2d6+1d8-1`.
+    pub fn notation(&self) -> String {
+        let mut out = String::new();
+        for (i, t) in self.terms.iter().enumerate() {
+            if t.sign < 0 {
+                out.push('-');
+            } else if i > 0 {
+                out.push('+');
+            }
+            match &t.kind {
+                TermKind::Const(c) => out.push_str(&c.to_string()),
+                TermKind::Dice(d) => out.push_str(&d.notation()),
+            }
+        }
+        out
+    }
+
+    /// A copy with `value` added as a constant term (no-op for 0).
+    pub fn plus_const(&self, value: i64) -> Expr {
+        let mut e = self.clone();
+        if value != 0 {
+            e.terms.push(Term {
+                sign: value.signum(),
+                kind: TermKind::Const(value.abs()),
+                position: 0,
+            });
+        }
+        e
+    }
+
     /// A copy with every dice count doubled (critical hits). Selectors are
     /// scaled with the count so `kh`/`dl` keep meaning the same thing.
     pub fn with_doubled_dice(&self) -> Expr {
