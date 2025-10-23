@@ -17,5 +17,6 @@ build:
 demo: build
 	./scripts/demo.sh
 
-load: build
+load:
+	cargo build --release --bins
 	./scripts/load.sh
