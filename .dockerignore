@@ -1,0 +1,10 @@
+target
+.git
+.github
+tests
+reviews
+SPEC.md
+PROGRESS.md
+DECISIONS.md
+*.md
+!README.md

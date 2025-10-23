@@ -1,0 +1,18 @@
+services:
+  tavernkeep:
+    build: .
+    image: tavernkeep:local
+    environment:
+      TK_UPSTREAM_URL: ${TK_UPSTREAM_URL:-https://api.open5e.com/v1}
+      TK_LOG: ${TK_LOG:-info}
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:1.29-alpine
+    depends_on:
+      - tavernkeep
+    ports:
+      - "${TK_PORT:-8080}:80"
+    volumes:
+      - ./deploy/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    restart: unless-stopped
