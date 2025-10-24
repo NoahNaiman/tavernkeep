@@ -13,6 +13,7 @@ use crate::clock::SharedClock;
 use crate::config::Config;
 use crate::open5e::models::{RawMonster, RawSearchPage, RawSpell};
 use crate::open5e::{Monster, SearchResults, Spell, UpstreamError};
+use crate::snapshot::{Saved, Snapshot};
 use crate::upstream::Upstream;
 
 /// A serialized model with its ETag, ready to serve.
@@ -244,6 +245,55 @@ impl Service {
     /// Readiness check for Open5e that probes when contact is stale.
     pub async fn upstream_reachable_now(&self) -> bool {
         self.upstream.probe_if_stale().await
+    }
+
+    /// Current spell and monster entries with their ages.
+    pub fn snapshot(&self) -> Snapshot {
+        fn saved<T: Clone>(entries: Vec<(String, Arc<Doc<T>>, Duration)>) -> Vec<Saved<T>> {
+            entries
+                .into_iter()
+                .map(|(slug, doc, age)| Saved {
+                    slug,
+                    age_ms: u64::try_from(age.as_millis()).unwrap_or(u64::MAX),
+                    value: doc.value.clone(),
+                })
+                .collect()
+        }
+        Snapshot {
+            version: crate::snapshot::VERSION,
+            saved_at_unix_ms: crate::snapshot::unix_ms_now(),
+            spells: saved(self.spells.export()),
+            monsters: saved(self.monsters.export()),
+        }
+    }
+
+    /// Load entries from `snapshot`, aged by `elapsed` (time since it was
+    /// written). Returns how many entries were restored.
+    pub async fn restore(&self, snapshot: Snapshot, elapsed: Duration) -> usize {
+        let mut restored = 0;
+        for s in snapshot.spells {
+            let age = Duration::from_millis(s.age_ms) + elapsed;
+            if validate_slug(&s.slug).is_ok()
+                && self
+                    .spells
+                    .import(&s.slug, Arc::new(Doc::new(s.value)), age)
+                    .await
+            {
+                restored += 1;
+            }
+        }
+        for m in snapshot.monsters {
+            let age = Duration::from_millis(m.age_ms) + elapsed;
+            if validate_slug(&m.slug).is_ok()
+                && self
+                    .monsters
+                    .import(&m.slug, Arc::new(Doc::new(m.value)), age)
+                    .await
+            {
+                restored += 1;
+            }
+        }
+        restored
     }
 
     /// Number of cached entries across all caches.

@@ -9,6 +9,7 @@ pub mod config;
 pub mod dice;
 pub mod open5e;
 pub mod service;
+pub mod snapshot;
 pub mod telemetry;
 pub mod upstream;
 pub mod warm;

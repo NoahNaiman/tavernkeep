@@ -5,6 +5,9 @@ services:
     environment:
       TK_UPSTREAM_URL: ${TK_UPSTREAM_URL:-https://api.open5e.com/v1}
       TK_LOG: ${TK_LOG:-info}
+      TK_CACHE_FILE: /data/cache.json
+    volumes:
+      - tk-cache:/data
     restart: unless-stopped
 
   nginx:
@@ -16,3 +19,6 @@ services:
     volumes:
       - ./deploy/nginx.conf:/etc/nginx/conf.d/default.conf:ro
     restart: unless-stopped
+
+volumes:
+  tk-cache:

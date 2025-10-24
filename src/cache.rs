@@ -33,6 +33,14 @@ struct Entry<V> {
     /// `None` records an upstream 404.
     value: Option<V>,
     stored_at: Duration,
+    /// Age the entry already had when it was imported from a snapshot.
+    prior_age: Duration,
+}
+
+impl<V> Entry<V> {
+    fn age(&self, now: Duration) -> Duration {
+        now.saturating_sub(self.stored_at) + self.prior_age
+    }
 }
 
 /// What a lookup produced.
@@ -102,6 +110,34 @@ impl<V: Clone + Send + Sync + 'static> SwrCache<V> {
         self.inner.store.entry_count()
     }
 
+    /// Every positive entry with its current age (for snapshots).
+    pub fn export(&self) -> Vec<(String, V, Duration)> {
+        let now = self.inner.clock.now();
+        self.inner
+            .store
+            .iter()
+            .filter_map(|(k, e)| {
+                let age = e.age(now);
+                e.value.map(|v| (k.to_string(), v, age))
+            })
+            .collect()
+    }
+
+    /// Insert `value` as if it had been fetched `age` ago. Returns false (and
+    /// stores nothing) when that age is already past the stale TTL.
+    pub async fn import(&self, key: &str, value: V, age: Duration) -> bool {
+        if age >= self.inner.ttls.stale {
+            return false;
+        }
+        let entry = Entry {
+            value: Some(value),
+            stored_at: self.inner.clock.now(),
+            prior_age: age,
+        };
+        self.inner.store.insert(key.to_string(), entry).await;
+        true
+    }
+
     /// Whether a fetch or refresh for `key` is running.
     pub fn is_inflight(&self, key: &str) -> bool {
         self.inflight().contains_key(key)
@@ -120,7 +156,7 @@ impl<V: Clone + Send + Sync + 'static> SwrCache<V> {
         let Some(entry) = self.inner.store.get(key).await else {
             return State::Missing;
         };
-        let age = self.inner.clock.now().saturating_sub(entry.stored_at);
+        let age = entry.age(self.inner.clock.now());
         let t = self.inner.ttls;
         match entry.value {
             None if age < t.negative => State::Negative,
@@ -166,15 +202,13 @@ impl<V: Clone + Send + Sync + 'static> SwrCache<V> {
     }
 
     fn to_cached(&self, entry: Entry<V>) -> Cached<V> {
+        let age = entry.age(self.inner.clock.now());
         match entry.value {
             None => Cached::NotFound,
-            Some(value) => {
-                let age = self.inner.clock.now().saturating_sub(entry.stored_at);
-                Cached::Fresh {
-                    value,
-                    remaining: self.inner.ttls.fresh.saturating_sub(age),
-                }
-            }
+            Some(value) => Cached::Fresh {
+                value,
+                remaining: self.inner.ttls.fresh.saturating_sub(age),
+            },
         }
     }
 
@@ -213,7 +247,7 @@ impl<V: Clone + Send + Sync + 'static> SwrCache<V> {
         // Another flight may have completed between our cache check and
         // registering this one; don't fetch again if so.
         if let Some(entry) = self.inner.store.get(key).await {
-            let age = self.inner.clock.now().saturating_sub(entry.stored_at);
+            let age = entry.age(self.inner.clock.now());
             let ttl = if entry.value.is_some() {
                 self.inner.ttls.fresh
             } else {
@@ -228,10 +262,12 @@ impl<V: Clone + Send + Sync + 'static> SwrCache<V> {
             Ok(Fetched::Found(v)) => Entry {
                 value: Some(v),
                 stored_at: self.inner.clock.now(),
+                prior_age: Duration::ZERO,
             },
             Ok(Fetched::NotFound) => Entry {
                 value: None,
                 stored_at: self.inner.clock.now(),
+                prior_age: Duration::ZERO,
             },
             Err(e) => return Err(e),
         };
@@ -431,6 +467,62 @@ mod tests {
             Cached::Fresh { value: 9, .. }
         ));
         assert_eq!(calls.load(Ordering::SeqCst), 2);
+    }
+
+    #[tokio::test]
+    async fn imported_entries_keep_their_age() {
+        let (c, clock) = cache();
+        let calls = Arc::new(AtomicUsize::new(0));
+        assert!(c.import("young", 1, Duration::from_secs(600)).await);
+        assert!(c.import("old", 2, Duration::from_secs(2 * 3600)).await);
+        assert!(!c.import("ancient", 3, TTLS.stale).await);
+        assert_eq!(
+            c.get("young", counting(&calls, Ok(Fetched::Found(9))))
+                .await
+                .unwrap(),
+            Cached::Fresh {
+                value: 1,
+                remaining: Duration::from_secs(3000)
+            }
+        );
+        assert_eq!(
+            c.get("old", counting(&calls, Err(UpstreamError::Timeout)))
+                .await
+                .unwrap(),
+            Cached::Stale { value: 2 }
+        );
+        clock.advance(Duration::from_secs(3000));
+        assert!(matches!(
+            c.get("young", counting(&calls, Err(UpstreamError::Timeout)))
+                .await
+                .unwrap(),
+            Cached::Stale { value: 1 }
+        ));
+        settle(&c, "young").await;
+        settle(&c, "old").await;
+        let mut exported = c.export();
+        exported.sort();
+        assert_eq!(
+            exported,
+            vec![
+                ("old".to_string(), 2, Duration::from_secs(2 * 3600 + 3000)),
+                ("young".to_string(), 1, Duration::from_secs(3600)),
+            ]
+        );
+    }
+
+    #[tokio::test]
+    async fn export_skips_negative_entries() {
+        let (c, _) = cache();
+        let calls = Arc::new(AtomicUsize::new(0));
+        c.get("gone", counting(&calls, Ok(Fetched::NotFound)))
+            .await
+            .unwrap();
+        c.get("here", counting(&calls, Ok(Fetched::Found(1))))
+            .await
+            .unwrap();
+        let keys: Vec<String> = c.export().into_iter().map(|(k, _, _)| k).collect();
+        assert_eq!(keys, vec!["here".to_string()]);
     }
 
     #[tokio::test]

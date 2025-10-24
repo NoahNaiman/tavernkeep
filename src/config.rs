@@ -40,6 +40,9 @@ pub struct Config {
     pub breaker_cooldown: Duration,
     /// `TK_READY_WINDOW_SECS`: upstream contact this recent counts as ready.
     pub ready_window: Duration,
+    /// `TK_CACHE_FILE`: optional snapshot path, loaded at startup and saved
+    /// every minute and on shutdown.
+    pub cache_file: Option<std::path::PathBuf>,
 }
 
 impl Default for Config {
@@ -59,6 +62,7 @@ impl Default for Config {
             breaker_threshold: 5,
             breaker_cooldown: Duration::from_secs(30),
             ready_window: Duration::from_secs(60),
+            cache_file: None,
         }
     }
 }
@@ -127,6 +131,10 @@ impl Config {
                 as u32,
             breaker_cooldown: secs("TK_BREAKER_COOLDOWN_SECS", d.breaker_cooldown, 1, 3600)?,
             ready_window: secs("TK_READY_WINDOW_SECS", d.ready_window, 1, 3600)?,
+            cache_file: get("TK_CACHE_FILE")
+                .map(|p| p.trim().to_string())
+                .filter(|p| !p.is_empty())
+                .map(std::path::PathBuf::from),
         };
         if cfg.stale_ttl < cfg.fresh_ttl {
             return Err(ConfigError {
