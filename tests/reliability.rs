@@ -112,6 +112,39 @@ async fn outage_never_returns_5xx_for_cached_slugs_and_recovers() {
         "refreshes reached upstream"
     );
 
+    // A second wave while the breaker is open (the mock clock is frozen, so
+    // it cannot half-open mid-wave): every cached slug is still served from
+    // its stale copy, and no request reaches the upstream.
+    // Let refreshes that were mid-retry when the breaker opened finish.
+    let mut upstream_before = server.received_requests().await.unwrap().len();
+    loop {
+        tokio::time::sleep(Duration::from_millis(50)).await;
+        let now = server.received_requests().await.unwrap().len();
+        if now == upstream_before {
+            break;
+        }
+        upstream_before = now;
+    }
+    let tasks: Vec<_> = (0..2000)
+        .map(|i| {
+            let app = app.clone();
+            let slugs = slugs.clone();
+            tokio::spawn(async move { app.get(&slugs[i % slugs.len()]).await.status })
+        })
+        .collect();
+    for t in tasks {
+        assert_eq!(t.await.unwrap(), StatusCode::OK);
+    }
+    assert!(matches!(
+        state.service.breaker_state(),
+        BreakerState::Open { .. }
+    ));
+    assert_eq!(
+        server.received_requests().await.unwrap().len(),
+        upstream_before,
+        "open breaker short-circuits refreshes"
+    );
+
     // Upstream recovers with changed data; after the cooldown the next stale
     // hit sends the half-open probe, which succeeds and closes the breaker.
     server.reset().await;
