@@ -84,7 +84,8 @@ mod tests {
     fn sample() -> Snapshot {
         Snapshot {
             version: VERSION,
-            saved_at_unix_ms: unix_ms_now(),
+            // Fixed, so two calls build identical snapshots.
+            saved_at_unix_ms: 1_700_000_000_000,
             spells: vec![Saved {
                 slug: "x".into(),
                 age_ms: 5,
@@ -136,7 +137,7 @@ mod tests {
     #[test]
     fn elapsed_since_save_uses_wall_time() {
         let mut s = sample();
-        s.saved_at_unix_ms -= 90_000;
+        s.saved_at_unix_ms = unix_ms_now() - 90_000;
         assert!(s.elapsed_since_save() >= Duration::from_secs(90));
         s.saved_at_unix_ms = u64::MAX;
         assert_eq!(s.elapsed_since_save(), Duration::ZERO);
