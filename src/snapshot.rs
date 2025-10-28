@@ -45,11 +45,21 @@ impl Snapshot {
     }
 }
 
-/// Write atomically: a temp file in the same directory, then rename.
+/// Serializes saves so the periodic and shutdown saves never share the
+/// temp file.
+static SAVE_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
+
+/// Write atomically and durably: a temp file in the same directory, synced
+/// to disk, then renamed over the target.
 pub fn save(path: &Path, snapshot: &Snapshot) -> io::Result<()> {
+    use std::io::Write;
+    let _guard = SAVE_LOCK.lock().unwrap_or_else(|e| e.into_inner());
     let tmp = path.with_extension("tmp");
     let bytes = serde_json::to_vec(snapshot).map_err(io::Error::other)?;
-    std::fs::write(&tmp, bytes)?;
+    let mut file = std::fs::File::create(&tmp)?;
+    file.write_all(&bytes)?;
+    file.sync_all()?;
+    drop(file);
     std::fs::rename(&tmp, path)
 }
 

@@ -231,10 +231,16 @@ impl<V: Clone + Send + Sync + 'static> SwrCache<V> {
         let key = key.to_string();
         let fut = fetch();
         tokio::spawn(async move {
-            let result = this.run_fetch(&key, fut).await;
+            // Deregisters on drop too, so a panicking fetch can't leave the
+            // key marked in flight forever (waiters then see the sender drop).
+            let guard = Deregister {
+                cache: this.clone(),
+                key,
+            };
+            let result = this.run_fetch(&guard.key, fut).await;
             // Store, then deregister, then publish: a caller that misses the
             // in-flight entry is guaranteed to see the stored value instead.
-            this.inflight().remove(&key);
+            drop(guard);
             let _ = tx.send(Some(result));
         });
         Waiter(rx)
@@ -276,6 +282,17 @@ impl<V: Clone + Send + Sync + 'static> SwrCache<V> {
             .insert(key.to_string(), entry.clone())
             .await;
         Ok(entry)
+    }
+}
+
+struct Deregister<V: Clone + Send + Sync + 'static> {
+    cache: SwrCache<V>,
+    key: String,
+}
+
+impl<V: Clone + Send + Sync + 'static> Drop for Deregister<V> {
+    fn drop(&mut self) {
+        self.cache.inflight().remove(&self.key);
     }
 }
 
@@ -562,6 +579,20 @@ mod tests {
             ));
         }
         assert_eq!(calls.load(Ordering::SeqCst), 1);
+    }
+
+    #[tokio::test]
+    async fn panicking_fetch_does_not_wedge_the_key() {
+        let (c, _) = cache();
+        let calls = Arc::new(AtomicUsize::new(0));
+        let panicky = || async { panic!("fetch blew up") };
+        assert!(c.get("k", panicky).await.is_err());
+        settle(&c, "k").await;
+        let r = c
+            .get("k", counting(&calls, Ok(Fetched::Found(3))))
+            .await
+            .unwrap();
+        assert!(matches!(r, Cached::Fresh { value: 3, .. }), "{r:?}");
     }
 
     #[tokio::test]

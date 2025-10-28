@@ -126,6 +126,14 @@ async fn serve(config: Config) -> std::io::Result<()> {
 
     if let Some(path) = &cache_file {
         restore_snapshot(&state.service, path).await;
+        // Fail at startup, not at shutdown, if the path isn't writable.
+        if let Err(e) = snapshot::save(path, &state.service.snapshot()) {
+            eprintln!(
+                "invalid configuration: TK_CACHE_FILE: cannot write {}: {e}",
+                path.display()
+            );
+            std::process::exit(2);
+        }
         let service = state.service.clone();
         let path = path.clone();
         tokio::spawn(async move {

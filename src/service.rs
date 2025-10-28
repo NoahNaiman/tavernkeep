@@ -112,7 +112,8 @@ pub fn upstream_to_api(e: &UpstreamError) -> ApiError {
     match e {
         UpstreamError::BreakerOpen { retry_after } => ApiError::Unavailable {
             message: "Open5e is unavailable and this entry is not cached".to_string(),
-            retry_after: retry_after.as_secs().max(1),
+            // Round up so clients don't come back while still open.
+            retry_after: retry_after.as_secs_f64().ceil().max(1.0) as u64,
         },
         // Details (URLs, library errors) stay in the logs, not in responses.
         other => ApiError::BadGateway(format!("Open5e request failed ({})", other.outcome())),
