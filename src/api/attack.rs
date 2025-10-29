@@ -13,7 +13,7 @@ pub struct AttackParams {
     seed: Option<u64>,
 }
 
-#[derive(Debug, Serialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ToHit {
     /// The d20 face rolled.
     pub natural: u32,
@@ -21,7 +21,7 @@ pub struct ToHit {
     pub total: i64,
 }
 
-#[derive(Debug, Serialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct AttackRoll {
     pub monster: String,
     pub action: String,

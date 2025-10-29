@@ -4,13 +4,16 @@ pub mod api;
 pub mod backoff;
 pub mod breaker;
 pub mod cache;
+pub mod cli;
 pub mod clock;
 pub mod config;
 pub mod dice;
 pub mod open5e;
+pub mod remote;
 pub mod service;
 pub mod snapshot;
 pub mod telemetry;
+pub mod term;
 pub mod upstream;
 pub mod warm;
 

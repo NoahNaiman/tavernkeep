@@ -5,7 +5,7 @@ pub mod parser;
 
 use rand::SeedableRng;
 use rand::rngs::StdRng;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 pub use eval::evaluate;
 pub use parser::parse;
@@ -186,7 +186,7 @@ impl DiceError {
 }
 
 /// The result of rolling one dice term.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct DieRoll {
     /// Canonical notation of the term, prefixed with `-` when subtracted.
     pub die: String,
@@ -197,7 +197,7 @@ pub struct DieRoll {
 }
 
 /// The full result of evaluating an expression.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct RollOutcome {
     pub expr: String,
     pub total: i64,

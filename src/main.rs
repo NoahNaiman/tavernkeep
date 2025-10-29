@@ -1,63 +1,42 @@
+use std::io::IsTerminal;
 use std::path::Path;
 use std::time::Duration;
 use tavernkeep::clock::SystemClock;
 use tavernkeep::config::Config;
 
+use tavernkeep::cli::{self, Command};
 use tavernkeep::service::Service;
+use tavernkeep::term::Style;
 use tavernkeep::{snapshot, telemetry, warm};
-
-const USAGE: &str = "\
-usage:
-  tavernkeep [serve]                       run the API (configured by TK_* env vars)
-  tavernkeep warm --file <party.txt> [--url <http://host:port>]
-                                           prefetch slugs into a running server
-                                           (default URL: $TK_WARM_URL or http://127.0.0.1:8080)
-";
-
-enum Command {
-    Serve,
-    Warm { file: String, url: String },
-    Help,
-}
-
-fn parse_args(args: &[String]) -> Result<Command, String> {
-    match args.first().map(String::as_str) {
-        None => Ok(Command::Serve),
-        Some("serve") if args.len() == 1 => Ok(Command::Serve),
-        Some("-h" | "--help" | "help") => Ok(Command::Help),
-        Some("warm") => {
-            let mut file = None;
-            let mut url = std::env::var("TK_WARM_URL")
-                .unwrap_or_else(|_| "http://127.0.0.1:8080".to_string());
-            let mut it = args[1..].iter();
-            while let Some(flag) = it.next() {
-                let value = it.next().ok_or_else(|| format!("{flag} needs a value"))?;
-                match flag.as_str() {
-                    "--file" | "-f" => file = Some(value.clone()),
-                    "--url" => url = value.clone(),
-                    other => return Err(format!("unknown flag {other}")),
-                }
-            }
-            let file = file.ok_or("warm needs --file <party.txt>")?;
-            Ok(Command::Warm { file, url })
-        }
-        Some(other) => Err(format!("unknown command {other:?}")),
-    }
-}
 
 #[tokio::main]
 async fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
-    let command = match parse_args(&args) {
+    let command = match cli::parse(&args, |k| std::env::var(k).ok()) {
         Ok(c) => c,
         Err(e) => {
-            eprintln!("error: {e}\n\n{USAGE}");
+            eprintln!("error: {e}\n\n{}", cli::USAGE);
             std::process::exit(2);
         }
     };
     match command {
-        Command::Help => print!("{USAGE}"),
+        Command::Help => print!("{}", cli::USAGE),
         Command::Warm { file, url } => std::process::exit(warm(&file, &url).await),
+        Command::Client { query, opts } => {
+            let style = Style {
+                color: !opts.no_color
+                    && std::env::var_os("NO_COLOR").is_none()
+                    && std::io::stdout().is_terminal(),
+                width: terminal_width(),
+            };
+            let (text, code) = cli::run(&query, &opts, &style).await;
+            if code == 0 {
+                println!("{text}");
+            } else {
+                eprintln!("{text}");
+            }
+            std::process::exit(code);
+        }
         Command::Serve => {
             telemetry::init_logging();
             let config = match Config::from_env() {
@@ -73,6 +52,15 @@ async fn main() {
             }
         }
     }
+}
+
+/// `$COLUMNS` when exported, else 80; clamped to a readable 40..=100.
+fn terminal_width() -> usize {
+    std::env::var("COLUMNS")
+        .ok()
+        .and_then(|c| c.trim().parse().ok())
+        .unwrap_or(80usize)
+        .clamp(40, 100)
 }
 
 async fn warm(file: &str, url: &str) -> i32 {
