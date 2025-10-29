@@ -180,7 +180,7 @@ All settings come from environment variables, validated at startup. An invalid v
 | `TK_CACHE_CAPACITY` | `10000` entries per cache |
 | `TK_BREAKER_THRESHOLD` / `TK_BREAKER_COOLDOWN_SECS` | `5` / `30` |
 | `TK_READY_WINDOW_SECS` | `60` |
-| `TK_CACHE_FILE` | unset (no snapshot) |
+| `TK_CACHE_FILE` | unset (no snapshot); must be writable, checked at startup |
 | `TK_LOG` | `info` (`tracing` env-filter syntax; JSON logs) |
 | `TK_WARM_URL` | `http://127.0.0.1:8080` (for `warm`) |
 
