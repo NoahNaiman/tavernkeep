@@ -22,9 +22,12 @@ use config::Config;
 
 /// Build the application router for `config`, using `clock` for all timing.
 pub fn app(config: Config, clock: SharedClock) -> (axum::Router, AppState) {
+    // Install the recorder first: the service sets gauges (tk_breaker_open)
+    // while it is built, and values recorded before that would be lost.
+    let metrics = telemetry::metrics_handle();
     let state = AppState {
         service: Arc::new(service::Service::new(Arc::new(config), clock)),
-        metrics: telemetry::metrics_handle(),
+        metrics,
     };
     (api::router(state.clone()), state)
 }
